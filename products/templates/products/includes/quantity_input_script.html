@@ -1,0 +1,46 @@
+<script type="text/javascript">
+    // Increment quantity
+    $('.increment-qty').click(function(e){
+        e.preventDefault();
+        let closestInput = getQuantityBox($(this));
+        let currentValue = parseInt($(closestInput).val());
+        $(closestInput).val(currentValue + 1);
+
+        handleDisableEnableInput(this);
+    })
+
+    // Decrement quantity
+    $('.decrement-qty').click(function(e){
+        e.preventDefault();
+        let closestInput = getQuantityBox($(this));
+        let currentValue = parseInt($(closestInput).val());
+        $(closestInput).val(currentValue - 1);
+        handleDisableEnableInput(this);
+    })
+
+    let allInputs = $('.qty_input');
+
+    for(let i = 0; i < allInputs.length; i++){
+        handleDisableEnableInput(allInputs[i]);
+    }
+
+    $('.qty_input').change(function() {
+        handleDisableEnableInput(this);
+    })
+
+    function getQuantityBox(btn){
+        return btn.closest('.input-group').find('.qty_input').first();
+    }
+
+    function handleDisableEnableInput(btn){
+        ;let item_id = $(btn).data('item_id')
+
+        let currentValue = parseInt($(`#id_qty_${item_id}`).val());
+        console.log(currentValue)
+        let disableMinus = currentValue < 2;
+        let disablePlus = currentValue > 98;
+
+        $(`#increment-qty_${item_id}`).prop('disabled', disablePlus);
+        $(`#decrement-qty_${item_id}`).prop('disabled', disableMinus);
+    }
+</script>
