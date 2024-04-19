@@ -1,6 +1,6 @@
-let public_key = $('#id_stripe_public_key').text().slice(1, -1);
-let client_secret = $('#id_client_secret').text().slice(1, -1);
-let stripe = Stripe(public_key);
+let publicKey = $('#id_stripe_public_key').text().slice(1, -1);
+let clientSecret = $('#id_client_secret').text().slice(1, -1);
+let stripe = Stripe(publicKey);
 let elements = stripe.elements();
 let style = {
     base: {
@@ -17,5 +17,56 @@ let style = {
         iconColor: '#dc3545'
     }
 };
-let card = elements.create('card', {style: style});
+let card = elements.create('card', { style: style });
 card.mount('#card-element');
+
+// Stripe validation
+
+function errorMessageHTML(message) {
+    return `
+    <span class="icon" role="alert">
+        <i class="fas fa-times"></i>
+    </span>
+    <span>${message}</span>
+    `;
+}
+
+
+card.addEventListener('change', function (e) {
+    let errorDiv = $('#card-errors');
+
+    if (e.error) {
+        $(errorDiv).html(errorMessageHTML(e.error.message));
+    } else {
+        errorDiv.textContent = '';
+    }
+});
+
+// Handle stripe card form submit
+var form = document.getElementById('payment-form');
+
+form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    card.update({ 'disabled': true });
+    $('#submit-button').attr('disabled', true);
+
+    console.log(clientSecret)
+    stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+            card: card,
+        }
+    }).then(function (result) {
+        if (result.error) {
+            console.log(result.error + " ERROR IOASKFAKLJA")
+            let errorDiv = document.getElementById('card-errors');
+            $(errorDiv).html(errorMessageHTML(result.error.message));
+            card.update({ 'disabled': false });
+            $('#submit-button').attr('disabled', false);
+        } else {
+            if (result.paymentIntent.status === 'succeeded') {
+                console.log("succeeded")
+                form.submit();
+            }
+        }
+    });
+});
