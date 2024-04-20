@@ -49,7 +49,8 @@ form.addEventListener('submit', function (ev) {
     ev.preventDefault();
     card.update({ 'disabled': true });
     $('#submit-button').attr('disabled', true);
-
+    $('#payment-form').fadeToggle(100);
+    $('#loading-overlay').fadeToggle(100);
     console.log(clientSecret)
     stripe.confirmCardPayment(clientSecret, {
         payment_method: {
@@ -57,9 +58,13 @@ form.addEventListener('submit', function (ev) {
         }
     }).then(function (result) {
         if (result.error) {
-            console.log(result.error + " ERROR IOASKFAKLJA")
             let errorDiv = document.getElementById('card-errors');
             $(errorDiv).html(errorMessageHTML(result.error.message));
+
+            
+            $('#payment-form').fadeToggle(100);
+            $('#loading-overlay').fadeToggle(100);
+
             card.update({ 'disabled': false });
             $('#submit-button').attr('disabled', false);
         } else {
