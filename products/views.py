@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, reverse, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
 from .models import Product, Category
@@ -71,8 +72,11 @@ def product_detail(request, product_id):
     return render(request, 'products/product_detail.html', context)
 
 
+@login_required
 def add_product(request):
     """Add a product to the store"""
+    confirm_user_is_admin(request)
+
     if request.POST:
         form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
@@ -92,8 +96,11 @@ def add_product(request):
     return render(request, template, context)
 
 
+@login_required
 def edit_product(request, product_id):
     """Edit product in store"""
+    confirm_user_is_admin(request)
+
     product = get_object_or_404(Product, pk=product_id)
 
     if request.POST:
@@ -121,13 +128,18 @@ def edit_product(request, product_id):
     return render(request, template, context)
 
 
+@login_required
 def delete_product(request, product_id):
     """Delete a product in the store"""
-    if request.user.is_superuser:
-        product = get_object_or_404(Product, pk=product_id)
-        product.delete()
-        messages.success(request, 'Product successfully deleted.')
-    else:
-        messages.error(request, 'Product deletion failed \
-            - Only admins can perform this action.')
+    confirm_user_is_admin(request)
+    
+    product = get_object_or_404(Product, pk=product_id)
+    product.delete()
+    messages.success(request, 'Product successfully deleted.')
     return redirect(reverse('products'))
+
+
+def confirm_user_is_admin(request):
+    if not request.user.is_superuser:
+        messages.error("Only admins can perform this action.")
+        return redirect(reverse('home'))
