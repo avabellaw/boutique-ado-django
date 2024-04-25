@@ -76,11 +76,12 @@ def add_product(request):
     if request.POST:
         form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            product = form.save()
             messages.success(request, 'Successfully added product')
-            return redirect(reverse('add_product'))
+            return redirect(reverse('product_detail', args=[product.id]))
         else:
-            messages.error(request, 'Failed to add product. Please ensure form is valid.')
+            messages.error(
+                request, 'Failed to add product. Please ensure form is valid.')
     else:
         form = ProductForm()
     template = 'products/add_product.html'
@@ -102,7 +103,9 @@ def edit_product(request, product_id):
             messages.success(request, 'Successfully edited product')
             return redirect(reverse('product_detail', args=[product.id]))
         else:
-            messages.error(request, 'Failed to update product. Please ensure form is valid')
+            messages.error(
+                request, 'Failed to update product. \
+                    Please ensure form is valid')
     else:
         form = ProductForm(instance=product)
 
@@ -116,3 +119,15 @@ def edit_product(request, product_id):
     }
 
     return render(request, template, context)
+
+
+def delete_product(request, product_id):
+    """Delete a product in the store"""
+    if request.user.is_superuser:
+        product = get_object_or_404(Product, pk=product_id)
+        product.delete()
+        messages.success(request, 'Product successfully deleted.')
+    else:
+        messages.error(request, 'Product deletion failed \
+            - Only admins can perform this action.')
+    return redirect(reverse('products'))
