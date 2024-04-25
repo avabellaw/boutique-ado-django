@@ -37,7 +37,15 @@
                             {% for item in bag_items %}
                                 <tr>
                                     <td class="p-3 w-25">
-                                        <img src="{{ item.product.image.url }}" alt="" class="img-fluid rounded">
+                                        {% if item.product.image %}
+                                            <img src="{{ item.product.image.url }}"
+                                                 alt="{{ item.product.name }}"
+                                                 class="img-fluid rounded">
+                                        {% else %}
+                                            <img src="{{ MEDIA_URL }}noimage.png"
+                                                 alt="{{ item.product.name }}"
+                                                 lass="img-fluid rounded">
+                                        {% endif %}
                                     </td>
                                     <td class="py-3">
                                         <p class="my-0">
@@ -57,7 +65,9 @@
                                         <p class="my-0">£{{ item.product.price }}</p>
                                     </td>
                                     <td class="py-3 w-25">
-                                        <form class="form update-form" method="post" action="{% url 'adjust_bag' item.item_id %}">
+                                        <form class="form update-form"
+                                              method="post"
+                                              action="{% url 'adjust_bag' item.item_id %}">
                                             {% csrf_token %}
                                             <div class="form-group">
                                                 <div class="input-group">
@@ -87,14 +97,14 @@
                                                             </span>
                                                         </button>
                                                     </div>
-                                                    {% if item.product.has_sizes %}
-                                                        <input type="hidden" name="product_size" value="{{ item.size }}">
-                                                    {% endif %}
+                                                    {% if item.product.has_sizes %}<input type="hidden" name="product_size" value="{{ item.size }}">{% endif %}
                                                 </div>
                                             </div>
                                         </form>
                                         <a class="update-link text-info"><small>update</small></a>
-                                        <a class="remove-item text-danger float-right" id="remove_{{ item.item_id }}" data-product_size="{{ item.size }}"><small>remove</small></a>
+                                        <a class="remove-item text-danger float-right"
+                                           id="remove_{{ item.item_id }}"
+                                           data-product_size="{{ item.size }}"><small>remove</small></a>
                                     </td>
                                     <td class="py-3">
                                         <p class="my-0">{{ item.product.price | calc_subtotal:item.quantity }}</p>
@@ -152,10 +162,9 @@
 {% endblock %}
 
 {% block postloadjs %}
-{{ block.super }}
-{% include 'products/includes/quantity_input_script.html' %}
-
-<script type="text/javascript">
+    {{ block.super }}
+    {% include 'products/includes/quantity_input_script.html' %}
+    <script type="text/javascript">
     // Update quantity on click
     $('.update-link').click(function(e) {
         let form = $(this).prev('.update-form');
@@ -174,5 +183,5 @@
             location.reload();
         });
     });
-</script>
+    </script>
 {% endblock %}
